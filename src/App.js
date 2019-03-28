@@ -7,6 +7,7 @@ import "./App.css";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import MarketPage from "./pages/MarketPage";
+import Navbar from "./components/Navbar";
 
 class App extends React.Component {
   state = {
@@ -46,6 +47,14 @@ class App extends React.Component {
     }
   };
 
+  handleSignout = async () => {
+    try {
+      await Auth.signOut();
+    } catch (err) {
+      console.err("aum namah shivaya error signing out");
+    }
+  };
+
   render() {
     const { user } = this.state;
 
@@ -54,6 +63,8 @@ class App extends React.Component {
     ) : (
       <Router>
         <React.Fragment>
+          {/* Navigation */}
+          <Navbar user={user} handleSignout={this.handleSignout} />
           {/* Routes */}
           <div className="app-container">
             <Route exact path="/" component={HomePage} />
