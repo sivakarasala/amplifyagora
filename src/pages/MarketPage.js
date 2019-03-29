@@ -7,7 +7,8 @@ import { Link } from "react-router-dom";
 class MarketPage extends React.Component {
   state = {
     market: null,
-    isLoading: true
+    isLoading: true,
+    isMarketOwner: false
   };
 
   componentDidMount() {
@@ -21,13 +22,23 @@ class MarketPage extends React.Component {
       };
       const result = await API.graphql(graphqlOperation(getMarket, input));
       console.log({ result });
-      this.setState({ market: result.data.getMarket, isLoading: false });
+      this.setState({ market: result.data.getMarket, isLoading: false }, () => {
+        this.checkMarketOwner();
+      });
     } catch (err) {
       console.error(err);
     }
   };
+
+  checkMarketOwner = () => {
+    const { user } = this.props;
+    const { market } = this.state;
+    if (user) {
+      this.setState({ isMarketOwner: user.username === market.owner });
+    }
+  };
   render() {
-    const { market, isLoading } = this.state;
+    const { market, isLoading, isMarketOwner } = this.state;
 
     return isLoading ? (
       <Loading fullscreen={true} />
