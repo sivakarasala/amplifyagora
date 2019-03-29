@@ -3,6 +3,8 @@ import { API, graphqlOperation } from "aws-amplify";
 import { getMarket } from "../graphql/queries";
 import { Loading, Tabs, Icon } from "element-react";
 import { Link } from "react-router-dom";
+import NewProduct from "../components/NewProduct";
+import Product from "../components/Product";
 
 class MarketPage extends React.Component {
   state = {
@@ -59,6 +61,40 @@ class MarketPage extends React.Component {
             {market.createdAt}
           </span>
         </div>
+
+        {/* New product */}
+        <Tabs type="border-card" value={isMarketOwner ? "1" : "2"}>
+          {isMarketOwner && (
+            <Tabs.Pane
+              label={
+                <>
+                  <Icon name="plus" className="icon" />
+                  Add Product
+                </>
+              }
+              name="1"
+            >
+              <NewProduct />
+            </Tabs.Pane>
+          )}
+
+          {/* Products List */}
+          <Tabs.Pane
+            label={
+              <>
+                <Icon name="menu" className="icon" />
+                Products ({market.products.items.length})
+              </>
+            }
+            name="2"
+          >
+            <div className="product-list">
+              {market.products.items.map(product => (
+                <Product product={product} />
+              ))}
+            </div>
+          </Tabs.Pane>
+        </Tabs>
       </>
     );
   }
