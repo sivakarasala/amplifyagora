@@ -1,6 +1,11 @@
 import React from "react";
 import { API, graphqlOperation } from "aws-amplify";
 import { getMarket } from "../graphql/queries";
+import {
+  onCreateProduct,
+  onDeleteProduct,
+  onUpdateProduct
+} from "../graphql/subscriptions";
 import { Loading, Tabs, Icon } from "element-react";
 import { Link } from "react-router-dom";
 import NewProduct from "../components/NewProduct";
@@ -15,6 +20,58 @@ class MarketPage extends React.Component {
 
   componentDidMount() {
     this.handleGetMarket();
+    this.createProductListener = API.graphql(
+      graphqlOperation(onCreateProduct)
+    ).subscribe({
+      next: productData => {
+        const createdProduct = productData.value.data.onCreateProduct;
+        const prevProducts = this.state.market.products.items.filter(
+          item => item.id !== createdProduct.id
+        );
+        const updatedProducts = [createdProduct, ...prevProducts];
+        const market = { ...this.state.market };
+        market.products.items = updatedProducts;
+        this.setState({ market });
+      }
+    });
+    this.updateProductListener = API.graphql(
+      graphqlOperation(onUpdateProduct)
+    ).subscribe({
+      next: productData => {
+        const updatedProduct = productData.value.data.onUpdateProduct;
+        const updatedProductIndex = this.state.market.products.items.findIndex(
+          item => item.id === updatedProduct.id
+        );
+        const updatedProducts = [
+          ...this.state.market.products.items.slice(0, updatedProductIndex),
+          updatedProduct,
+          ...this.state.market.products.items.slice(updatedProductIndex + 1)
+        ];
+        const market = { ...this.state.market };
+        market.products.items = updatedProducts;
+        this.setState({ market });
+      }
+    });
+
+    this.deleteProductListener = API.graphql(
+      graphqlOperation(onDeleteProduct)
+    ).subscribe({
+      next: productData => {
+        const deletedProduct = productData.value.data.onDeleteProduct;
+        const updatedProducts = this.state.market.products.items.filter(
+          item => item.id !== deletedProduct.id
+        );
+        const market = { ...this.state.market };
+        market.products.items = updatedProducts;
+        this.setState({ market });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.createProductListener.unsubscribe();
+    this.updateProductListener.unsubscribe();
+    this.deleteProductListener.unsubscribe();
   }
 
   handleGetMarket = async () => {
@@ -44,7 +101,7 @@ class MarketPage extends React.Component {
     return isLoading ? (
       <Loading fullscreen={true} />
     ) : (
-      <>
+      <React.Fragment>
         {/* Back Button */}
         <Link className="link" to="/">
           Back to Markets List
@@ -66,10 +123,10 @@ class MarketPage extends React.Component {
           {isMarketOwner && (
             <Tabs.Pane
               label={
-                <>
+                <React.Fragment>
                   <Icon name="plus" className="icon" />
                   Add Product
-                </>
+                </React.Fragment>
               }
               name="1"
             >
@@ -80,10 +137,10 @@ class MarketPage extends React.Component {
           {/* Products List */}
           <Tabs.Pane
             label={
-              <>
+              <React.Fragment>
                 <Icon name="menu" className="icon" />
                 Products ({market.products.items.length})
-              </>
+              </React.Fragment>
             }
             name="2"
           >
@@ -94,7 +151,7 @@ class MarketPage extends React.Component {
             </div>
           </Tabs.Pane>
         </Tabs>
-      </>
+      </React.Fragment>
     );
   }
 }

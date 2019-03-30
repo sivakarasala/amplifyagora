@@ -27,10 +27,7 @@ class Product extends React.Component {
         shipped,
         price: convertDollarsToCents(price)
       };
-      const result = await API.graphql(
-        graphqlOperation(updateProduct, { input })
-      );
-      console.log({ result });
+      await API.graphql(graphqlOperation(updateProduct, { input }));
       Notification({
         title: "Success",
         message: "Product successfully updated!",
@@ -47,9 +44,7 @@ class Product extends React.Component {
       const input = {
         id: productId
       };
-      const result = await API.graphql(
-        graphqlOperation(deleteProduct, { input })
-      );
+      await API.graphql(graphqlOperation(deleteProduct, { input }));
       Notification({
         title: "Success",
         message: "Product successfully deleted!",
