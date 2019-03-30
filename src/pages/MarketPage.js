@@ -23,7 +23,6 @@ class MarketPage extends React.Component {
         id: this.props.marketId
       };
       const result = await API.graphql(graphqlOperation(getMarket, input));
-      console.log({ result });
       this.setState({ market: result.data.getMarket, isLoading: false }, () => {
         this.checkMarketOwner();
       });
@@ -90,7 +89,7 @@ class MarketPage extends React.Component {
           >
             <div className="product-list">
               {market.products.items.map(product => (
-                <Product product={product} />
+                <Product product={product} key={product.id} />
               ))}
             </div>
           </Tabs.Pane>
