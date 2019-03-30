@@ -5,7 +5,7 @@ amplify
 src/aws-exports.js
 .graphqlconfig.yml
 .amplifyrc
-
+.env.development
 # dependencies
 /node_modules
 /.pnp
